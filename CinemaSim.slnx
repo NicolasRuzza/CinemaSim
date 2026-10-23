@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Cinema.Api/Cinema.Api.csproj" />
+    <Project Path="src/Cinema.Domain/Cinema.Domain.csproj" Id="d7823a4e-024f-48e6-ab1d-27c69aa79e8d" />
+    <Project Path="src/Cinema.Infrastructure/Cinema.Infrastructure.csproj" Id="958559ac-4370-4920-a0f3-ca2da321a983" />
+    <Project Path="src/Cinema.Observability/Cinema.Observability.csproj" Id="52e46c00-a191-4613-b9d3-50fec0df8e30" />
+    <Project Path="src/Cinema.Workers/Cinema.Workers.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Cinema.BddTests/Cinema.BddTests.csproj" />
+    <Project Path="tests/Cinema.IntegrationTests/Cinema.IntegrationTests.csproj" />
+    <Project Path="tests/Cinema.UnitTests/Cinema.UnitTests.csproj" />
+  </Folder>
+</Solution>
