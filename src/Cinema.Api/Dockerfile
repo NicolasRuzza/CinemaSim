@@ -13,6 +13,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Cinema.Api/Cinema.Api.csproj", "Cinema.Api/"]
+COPY ["Cinema.Domain/Cinema.Domain.csproj", "Cinema.Domain/"]
+COPY ["Cinema.Infrastructure/Cinema.Infrastructure.csproj", "Cinema.Infrastructure/"]
 RUN dotnet restore "./Cinema.Api/Cinema.Api.csproj"
 COPY . .
 WORKDIR "/src/Cinema.Api"
