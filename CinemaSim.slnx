@@ -7,7 +7,7 @@
     <Project Path="src/Cinema.Workers/Cinema.Workers.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Cinema.BddTests/Cinema.BddTests.csproj" />
+    <Project Path="tests/Cinema.BddTests/Cinema.BddTests.csproj" Id="7ad943f8-04d7-4bcf-adf1-f81129f05358" />
     <Project Path="tests/Cinema.IntegrationTests/Cinema.IntegrationTests.csproj" />
     <Project Path="tests/Cinema.UnitTests/Cinema.UnitTests.csproj" />
   </Folder>

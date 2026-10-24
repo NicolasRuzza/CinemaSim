@@ -14,6 +14,9 @@
 *.trx
 *.coverage
 
+# Reqnroll code-behind (generated on every build)
+*.feature.cs
+
 # Local configuration and secrets
 .env
 .env.*
