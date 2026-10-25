@@ -13,8 +13,9 @@ public sealed class HoldSeatStepDefinitions(SeatHoldDriver driver)
     public void GivenASessionWithTheSeatAvailable(string sessionId, string seatId) =>
         driver.AddSession(sessionId, seatId);
 
+    [Given("customer {string} holds seat {string} of session {string}")]
     [When("customer {string} holds seat {string} of session {string}")]
-    public async Task WhenCustomerHoldsSeatOfSession(string customerId, string seatId, string sessionId) =>
+    public async Task CustomerHoldsSeatOfSession(string customerId, string seatId, string sessionId) =>
         await driver.HoldSeatAsync(customerId, seatId, sessionId);
 
     [Then("the hold is accepted")]
