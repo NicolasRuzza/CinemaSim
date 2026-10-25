@@ -1,9 +1,20 @@
 namespace Cinema.Api.Features.Seats.HoldSeat;
 
 /// <summary>Outcome of a hold attempt. Expected business outcomes are returned, not thrown.</summary>
-public sealed record HoldSeatResult(bool IsAccepted)
+public sealed record HoldSeatResult
 {
-    public static HoldSeatResult Accepted() => new(true);
+    private HoldSeatResult(bool isAccepted, HoldRejectionReason? rejectionReason)
+    {
+        IsAccepted = isAccepted;
+        RejectionReason = rejectionReason;
+    }
 
-    public static HoldSeatResult Rejected() => new(false);
+    public bool IsAccepted { get; }
+
+    /// <summary>Why the hold was refused. Null when the hold was accepted.</summary>
+    public HoldRejectionReason? RejectionReason { get; }
+
+    public static HoldSeatResult Accepted() => new(true, null);
+
+    public static HoldSeatResult Rejected(HoldRejectionReason reason) => new(false, reason);
 }

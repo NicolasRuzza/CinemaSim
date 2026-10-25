@@ -1,3 +1,4 @@
+using Cinema.Api.Features.Seats.HoldSeat;
 using Cinema.BddTests.Drivers;
 
 namespace Cinema.BddTests.StepDefinitions;
@@ -21,4 +22,11 @@ public sealed class HoldSeatStepDefinitions(SeatHoldDriver driver)
     [Then("the hold is accepted")]
     public void ThenTheHoldIsAccepted() =>
         driver.LastResult.IsAccepted.Should().BeTrue("an available seat can be held");
+
+    [Then("the hold is rejected because the seat is already held")]
+    public void ThenTheHoldIsRejectedBecauseTheSeatIsAlreadyHeld()
+    {
+        driver.LastResult.IsAccepted.Should().BeFalse("another customer already holds the seat");
+        driver.LastResult.RejectionReason.Should().Be(HoldRejectionReason.SeatAlreadyHeld);
+    }
 }
