@@ -2,6 +2,7 @@ using Cinema.Api.Features.Seats.HoldSeat;
 using Cinema.BddTests.Support;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 
 namespace Cinema.BddTests.Drivers;
 
@@ -12,6 +13,7 @@ namespace Cinema.BddTests.Drivers;
 public sealed class SeatHoldDriver
 {
     private readonly InMemorySessionSchedule _schedule = new();
+    private readonly FakeTimeProvider _clock = new();
     private readonly IMediator _mediator;
     private IReadOnlyList<HoldSeatResult> _lastResults = [];
 
@@ -20,6 +22,7 @@ public sealed class SeatHoldDriver
         var services = new ServiceCollection();
         services.AddMediator();
         services.AddSingleton<ISessionSchedule>(_schedule);
+        services.AddSingleton<TimeProvider>(_clock);
         services.AddSingleton<ISeatLockStore, InMemorySeatLockStore>();
         _mediator = services.BuildServiceProvider().GetRequiredService<IMediator>();
     }
@@ -35,6 +38,10 @@ public sealed class SeatHoldDriver
 
     public void AddSession(string sessionId, params string[] seatIds) =>
         _schedule.Add(sessionId, seatIds);
+
+    /// <summary>Moves the scenario clock forward instantly, without waiting.</summary>
+    public void AdvanceTime(TimeSpan elapsed) =>
+        _clock.Advance(elapsed);
 
     public async Task HoldSeatAsync(string customerId, string seatId, string sessionId) =>
         _lastResults = [await _mediator.Send(new HoldSeatCommand(sessionId, seatId, customerId))];

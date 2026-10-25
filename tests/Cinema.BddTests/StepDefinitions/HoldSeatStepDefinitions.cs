@@ -42,6 +42,14 @@ public sealed class HoldSeatStepDefinitions(SeatHoldDriver driver)
         driver.LastResult.RejectionReason.Should().Be(expectedReason);
     }
 
+    [Given("{int} minutes and {int} seconds have passed")]
+    public void GivenMinutesAndSecondsHavePassed(int minutes, int seconds) =>
+        driver.AdvanceTime(TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(seconds));
+
+    [Given("{int} minutes have passed")]
+    public void GivenMinutesHavePassed(int minutes) =>
+        driver.AdvanceTime(TimeSpan.FromMinutes(minutes));
+
     [When("{int} different customers try to hold seat {string} of session {string} at the same time")]
     public async Task WhenCustomersTryToHoldSeatAtTheSameTime(int customerCount, string seatId, string sessionId) =>
         await driver.HoldSeatSimultaneouslyAsync(customerCount, seatId, sessionId);
