@@ -13,7 +13,7 @@ public sealed class SeatHoldDriver
 {
     private readonly InMemorySessionSchedule _schedule = new();
     private readonly IMediator _mediator;
-    private HoldSeatResult? _lastResult;
+    private IReadOnlyList<HoldSeatResult> _lastResults = [];
 
     public SeatHoldDriver()
     {
@@ -24,12 +24,35 @@ public sealed class SeatHoldDriver
         _mediator = services.BuildServiceProvider().GetRequiredService<IMediator>();
     }
 
+    /// <summary>The result of the last single hold attempt.</summary>
     public HoldSeatResult LastResult =>
-        _lastResult ?? throw new InvalidOperationException("No hold was attempted in this scenario.");
+        _lastResults.Count == 1
+            ? _lastResults[0]
+            : throw new InvalidOperationException($"Expected a single hold result, but there are {_lastResults.Count}.");
+
+    /// <summary>The results of the last operation: one for a single hold, many for a simultaneous batch.</summary>
+    public IReadOnlyList<HoldSeatResult> LastResults => _lastResults;
 
     public void AddSession(string sessionId, params string[] seatIds) =>
         _schedule.Add(sessionId, seatIds);
 
     public async Task HoldSeatAsync(string customerId, string seatId, string sessionId) =>
-        _lastResult = await _mediator.Send(new HoldSeatCommand(sessionId, seatId, customerId));
+        _lastResults = [await _mediator.Send(new HoldSeatCommand(sessionId, seatId, customerId))];
+
+    /// <summary>Fires one hold per customer at once; every attempt waits for the same start signal.</summary>
+    public async Task HoldSeatSimultaneouslyAsync(int customerCount, string seatId, string sessionId)
+    {
+        var startSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var attempts = Enumerable.Range(1, customerCount)
+            .Select(number => Task.Run(async () =>
+            {
+                await startSignal.Task;
+                return await _mediator.Send(new HoldSeatCommand(sessionId, seatId, $"customer-{number}"));
+            }))
+            .ToArray();
+
+        startSignal.SetResult();
+        _lastResults = await Task.WhenAll(attempts);
+    }
 }

@@ -29,4 +29,21 @@ public sealed class HoldSeatStepDefinitions(SeatHoldDriver driver)
         driver.LastResult.IsAccepted.Should().BeFalse("another customer already holds the seat");
         driver.LastResult.RejectionReason.Should().Be(HoldRejectionReason.SeatAlreadyHeld);
     }
+
+    [When("{int} different customers try to hold seat {string} of session {string} at the same time")]
+    public async Task WhenCustomersTryToHoldSeatAtTheSameTime(int customerCount, string seatId, string sessionId) =>
+        await driver.HoldSeatSimultaneouslyAsync(customerCount, seatId, sessionId);
+
+    [Then("exactly {int} hold is accepted")]
+    public void ThenExactlyHoldIsAccepted(int expected) =>
+        driver.LastResults.Count(result => result.IsAccepted).Should().Be(expected);
+
+    [Then("the other {int} holds are rejected because the seat is already held")]
+    public void ThenTheOtherHoldsAreRejectedBecauseTheSeatIsAlreadyHeld(int expected)
+    {
+        var rejected = driver.LastResults.Where(result => !result.IsAccepted).ToList();
+
+        rejected.Should().HaveCount(expected);
+        rejected.Should().OnlyContain(result => result.RejectionReason == HoldRejectionReason.SeatAlreadyHeld);
+    }
 }
