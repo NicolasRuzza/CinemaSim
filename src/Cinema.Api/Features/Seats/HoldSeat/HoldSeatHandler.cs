@@ -1,8 +1,12 @@
 using Mediator;
+using Microsoft.Extensions.Options;
 
 namespace Cinema.Api.Features.Seats.HoldSeat;
 
-public sealed class HoldSeatHandler(ISessionSchedule schedule, ISeatLockStore seatLocks)
+public sealed class HoldSeatHandler(
+    ISessionSchedule schedule,
+    ISeatLockStore seatLocks,
+    IOptions<HoldSeatOptions> options)
     : ICommandHandler<HoldSeatCommand, HoldSeatResult>
 {
     public async ValueTask<HoldSeatResult> Handle(HoldSeatCommand command, CancellationToken cancellationToken)
@@ -21,6 +25,7 @@ public sealed class HoldSeatHandler(ISessionSchedule schedule, ISeatLockStore se
             command.SessionId,
             command.SeatId,
             command.CustomerId,
+            options.Value.HoldDuration,
             cancellationToken);
 
         return outcome == SeatLockOutcome.HeldByAnother
