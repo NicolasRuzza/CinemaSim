@@ -23,7 +23,7 @@ Service ports and the Loki readiness check are documented in [`infra/README.md`]
 ## Prerequisites
 
 - .NET 10 SDK.
-- Docker, only for the local infrastructure above.
+- Docker, for the local infrastructure above and for the Redis contract tests.
 
 ## Tooling
 
@@ -31,6 +31,8 @@ Service ports and the Loki readiness check are documented in [`infra/README.md`]
 - [Mediator](https://github.com/martinothamar/Mediator) (source generator, MIT) for commands and queries. The generator is installed only in the host project, `Cinema.Api`.
 - Reqnroll + xUnit for BDD scenarios, and AwesomeAssertions (Apache-2.0) for assertions.
 - `FakeTimeProvider` (Microsoft.Extensions.TimeProvider.Testing, MIT) moves time forward instantly in scenarios, so a 5-minute hold expires without waiting.
+- [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) (MIT) backs the seat lock. `RedisSeatLockStore` runs a Lua script so checking and taking a seat is one atomic step.
+- [Testcontainers](https://dotnet.testcontainers.org/) (MIT) starts a throwaway Redis for the contract tests.
 - Use-case settings follow the .NET Options pattern, for example `HoldSeatOptions.HoldDuration` (5 minutes by default).
 
 ## Run the tests
@@ -41,7 +43,7 @@ dotnet test tests/Cinema.BddTests
 dotnet test tests/Cinema.IntegrationTests
 ```
 
-`Cinema.IntegrationTests` holds the seat lock contract tests: one suite of rules that every `ISeatLockStore` must honor. It runs against the in-memory fake today; the Redis adapter will run the same suite (through Testcontainers, so Docker must be running).
+`Cinema.IntegrationTests` holds the seat lock contract tests: one suite of rules that every `ISeatLockStore` must honor. It runs against the in-memory fake and against a real Redis, so the fake used by the BDD scenarios cannot drift from the adapter. The Redis tests start a container through Testcontainers, so `dotnet test` must be able to reach Docker (for example, run it from WSL, where Docker lives). Skip them with `--filter "Requires!=Docker"`.
 
 Scenarios are in `tests/Cinema.BddTests/Features`. Reqnroll generates the `*.feature.cs` files on every build; they are git-ignored. A scenario without step definitions fails until its steps are implemented. The in-memory seat lock used by the scenarios is a test double: real atomicity and expiration are verified against Redis in the integration tests.
 
