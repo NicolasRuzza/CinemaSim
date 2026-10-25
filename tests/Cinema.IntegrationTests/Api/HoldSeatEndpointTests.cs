@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using AwesomeAssertions;
 
 namespace Cinema.IntegrationTests.Api;
@@ -47,6 +48,35 @@ public sealed class HoldSeatEndpointTests : IDisposable
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
     }
+
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("""{"customerId":"Bob"}""")]
+    [InlineData("""{"seatId":"A1"}""")]
+    [InlineData("""{"seatId":"","customerId":"Bob"}""")]
+    [InlineData("""{"seatId":"A1","customerId":"   "}""")]
+    public async Task Holding_with_a_missing_or_blank_field_returns_400_as_problem_details(string json)
+    {
+        var response = await PostJson("S1", json);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+    }
+
+    [Fact]
+    public async Task Repeating_a_hold_by_the_same_customer_returns_200()
+    {
+        await Hold("S1", "A1", "Bob");
+
+        var response = await Hold("S1", "A1", "Bob");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    private Task<HttpResponseMessage> PostJson(string sessionId, string json) =>
+        _factory.CreateClient().PostAsync(
+            $"/api/v1/sessions/{sessionId}/seats/hold",
+            new StringContent(json, Encoding.UTF8, "application/json"));
 
     private Task<HttpResponseMessage> Hold(string sessionId, string seatId, string customerId) =>
         _factory.CreateClient().PostAsJsonAsync(
