@@ -29,6 +29,14 @@ public sealed class HoldSeatController(ISender sender) : ControllerBase
                 statusCode: StatusCodes.Status409Conflict,
                 title: "The seat is already held",
                 detail: $"Another customer holds seat {request.SeatId} of session {sessionId}."),
+            HoldRejectionReason.SessionNotFound => Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "The session was not found",
+                detail: $"Session {sessionId} does not exist."),
+            HoldRejectionReason.SeatNotFound => Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "The seat was not found",
+                detail: $"Seat {request.SeatId} does not exist in session {sessionId}."),
             _ => throw new InvalidOperationException($"Rejection reason '{result.RejectionReason}' has no HTTP mapping yet."),
         };
     }
