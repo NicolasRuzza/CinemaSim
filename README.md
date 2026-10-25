@@ -20,6 +20,26 @@ docker compose ps
 
 Service ports and the Loki readiness check are documented in [`infra/README.md`](infra/README.md). In this development setup, applications started directly from Visual Studio do not produce Docker container logs for Alloy to collect; containerized applications do.
 
+## Prerequisites
+
+- .NET 10 SDK.
+- Docker, only for the local infrastructure above.
+
+## Tooling
+
+- ASP.NET Core Web API with Vertical Slice Architecture: each use case lives in `src/Cinema.Api/Features/<Area>/<UseCase>/` with its command, handler, result and ports.
+- [Mediator](https://github.com/martinothamar/Mediator) (source generator, MIT) for commands and queries. The generator is installed only in the host project, `Cinema.Api`.
+- Reqnroll + xUnit for BDD scenarios, and AwesomeAssertions (Apache-2.0) for assertions.
+
+## Run the tests
+
+```sh
+dotnet build CinemaSim.slnx
+dotnet test tests/Cinema.BddTests
+```
+
+Scenarios are in `tests/Cinema.BddTests/Features`. Reqnroll generates the `*.feature.cs` files on every build; they are git-ignored. Scenarios without step definitions yet fail on purpose: they are the TDD backlog.
+
 ## Project direction
 
 1. Implement seat holds with an atomic Redis operation and a five-minute TTL.
