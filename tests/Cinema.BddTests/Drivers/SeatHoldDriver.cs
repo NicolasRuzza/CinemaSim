@@ -20,6 +20,7 @@ public sealed class SeatHoldDriver
         var services = new ServiceCollection();
         services.AddMediator();
         services.AddSingleton<ISessionSchedule>(_schedule);
+        services.AddSingleton<ISeatLockStore, InMemorySeatLockStore>();
         _mediator = services.BuildServiceProvider().GetRequiredService<IMediator>();
     }
 
