@@ -38,7 +38,10 @@ Service ports and the Loki readiness check are documented in [`infra/README.md`]
 ```sh
 dotnet build CinemaSim.slnx
 dotnet test tests/Cinema.BddTests
+dotnet test tests/Cinema.IntegrationTests
 ```
+
+`Cinema.IntegrationTests` holds the seat lock contract tests: one suite of rules that every `ISeatLockStore` must honor. It runs against the in-memory fake today; the Redis adapter will run the same suite (through Testcontainers, so Docker must be running).
 
 Scenarios are in `tests/Cinema.BddTests/Features`. Reqnroll generates the `*.feature.cs` files on every build; they are git-ignored. A scenario without step definitions fails until its steps are implemented. The in-memory seat lock used by the scenarios is a test double: real atomicity and expiration are verified against Redis in the integration tests.
 
