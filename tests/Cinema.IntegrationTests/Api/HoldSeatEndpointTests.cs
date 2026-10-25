@@ -30,6 +30,24 @@ public sealed class HoldSeatEndpointTests : IDisposable
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
     }
 
+    [Fact]
+    public async Task Holding_a_seat_of_a_nonexistent_session_returns_404_as_problem_details()
+    {
+        var response = await Hold("S9", "A1", "Bob");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+    }
+
+    [Fact]
+    public async Task Holding_a_nonexistent_seat_returns_404_as_problem_details()
+    {
+        var response = await Hold("S1", "Z9", "Bob");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+    }
+
     private Task<HttpResponseMessage> Hold(string sessionId, string seatId, string customerId) =>
         _factory.CreateClient().PostAsJsonAsync(
             $"/api/v1/sessions/{sessionId}/seats/hold",
