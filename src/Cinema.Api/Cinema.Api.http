@@ -1,6 +1,19 @@
 @Cinema.Api_HostAddress = http://localhost:5169
 
-GET {{Cinema.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Hold a seat: 200 when accepted (also when the same customer repeats it)
+POST {{Cinema.Api_HostAddress}}/api/v1/sessions/S1/seats/hold
+Content-Type: application/json
 
-###
+{
+  "seatId": "A1",
+  "customerId": "Bob"
+}
+
+### Another customer on the same seat: 409 while Bob's hold is active
+POST {{Cinema.Api_HostAddress}}/api/v1/sessions/S1/seats/hold
+Content-Type: application/json
+
+{
+  "seatId": "A1",
+  "customerId": "Jessica"
+}
