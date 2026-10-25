@@ -4,4 +4,5 @@ namespace Cinema.Api.Features.Seats.HoldSeat;
 public enum HoldRejectionReason
 {
     SeatAlreadyHeld,
+    SessionNotFound,
 }

@@ -23,11 +23,22 @@ public sealed class HoldSeatStepDefinitions(SeatHoldDriver driver)
     public void ThenTheHoldIsAccepted() =>
         driver.LastResult.IsAccepted.Should().BeTrue("an available seat can be held");
 
-    [Then("the hold is rejected because the seat is already held")]
-    public void ThenTheHoldIsRejectedBecauseTheSeatIsAlreadyHeld()
+    private static readonly Dictionary<string, HoldRejectionReason> RejectionReasons = new()
     {
-        driver.LastResult.IsAccepted.Should().BeFalse("another customer already holds the seat");
-        driver.LastResult.RejectionReason.Should().Be(HoldRejectionReason.SeatAlreadyHeld);
+        ["the seat is already held"] = HoldRejectionReason.SeatAlreadyHeld,
+        ["the session does not exist"] = HoldRejectionReason.SessionNotFound,
+    };
+
+    [Then(@"^the hold is rejected because (.+)$")]
+    public void ThenTheHoldIsRejectedBecause(string reasonText)
+    {
+        if (!RejectionReasons.TryGetValue(reasonText, out var expectedReason))
+        {
+            Assert.Fail($"The scenario uses an unknown rejection reason: '{reasonText}'.");
+        }
+
+        driver.LastResult.IsAccepted.Should().BeFalse("the hold must be rejected");
+        driver.LastResult.RejectionReason.Should().Be(expectedReason);
     }
 
     [When("{int} different customers try to hold seat {string} of session {string} at the same time")]
