@@ -12,6 +12,11 @@ public sealed class HoldSeatHandler(ISessionSchedule schedule, ISeatLockStore se
             return HoldSeatResult.Rejected(HoldRejectionReason.SessionNotFound);
         }
 
+        if (!schedule.SeatExists(command.SessionId, command.SeatId))
+        {
+            return HoldSeatResult.Rejected(HoldRejectionReason.SeatNotFound);
+        }
+
         var outcome = await seatLocks.TryAcquireAsync(
             command.SessionId,
             command.SeatId,
