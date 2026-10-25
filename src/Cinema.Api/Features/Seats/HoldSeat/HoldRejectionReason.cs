@@ -5,4 +5,5 @@ public enum HoldRejectionReason
 {
     SeatAlreadyHeld,
     SessionNotFound,
+    SeatNotFound,
 }

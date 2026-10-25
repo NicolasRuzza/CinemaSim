@@ -27,6 +27,7 @@ public sealed class HoldSeatStepDefinitions(SeatHoldDriver driver)
     {
         ["the seat is already held"] = HoldRejectionReason.SeatAlreadyHeld,
         ["the session does not exist"] = HoldRejectionReason.SessionNotFound,
+        ["the seat does not exist"] = HoldRejectionReason.SeatNotFound,
     };
 
     [Then(@"^the hold is rejected because (.+)$")]
