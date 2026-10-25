@@ -30,6 +30,8 @@ Service ports and the Loki readiness check are documented in [`infra/README.md`]
 - ASP.NET Core Web API with Vertical Slice Architecture: each use case lives in `src/Cinema.Api/Features/<Area>/<UseCase>/` with its command, handler, result and ports.
 - [Mediator](https://github.com/martinothamar/Mediator) (source generator, MIT) for commands and queries. The generator is installed only in the host project, `Cinema.Api`.
 - Reqnroll + xUnit for BDD scenarios, and AwesomeAssertions (Apache-2.0) for assertions.
+- `FakeTimeProvider` (Microsoft.Extensions.TimeProvider.Testing, MIT) moves time forward instantly in scenarios, so a 5-minute hold expires without waiting.
+- Use-case settings follow the .NET Options pattern, for example `HoldSeatOptions.HoldDuration` (5 minutes by default).
 
 ## Run the tests
 
@@ -38,7 +40,7 @@ dotnet build CinemaSim.slnx
 dotnet test tests/Cinema.BddTests
 ```
 
-Scenarios are in `tests/Cinema.BddTests/Features`. Reqnroll generates the `*.feature.cs` files on every build; they are git-ignored. Scenarios without step definitions yet fail on purpose: they are the TDD backlog.
+Scenarios are in `tests/Cinema.BddTests/Features`. Reqnroll generates the `*.feature.cs` files on every build; they are git-ignored. A scenario without step definitions fails until its steps are implemented. The in-memory seat lock used by the scenarios is a test double: real atomicity and expiration are verified against Redis in the integration tests.
 
 ## Project direction
 
