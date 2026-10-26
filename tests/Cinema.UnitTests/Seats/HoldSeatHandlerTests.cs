@@ -1,5 +1,6 @@
 using AwesomeAssertions;
 using Cinema.Api.Features.Seats.HoldSeat;
+using Cinema.Infrastructure.SeatLocks;
 using Microsoft.Extensions.Options;
 using Moq;
 

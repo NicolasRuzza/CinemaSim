@@ -1,3 +1,4 @@
+using Cinema.Infrastructure.SeatLocks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -6,7 +7,10 @@ namespace Cinema.Infrastructure.Redis;
 
 public static class RedisServiceCollectionExtensions
 {
-    /// <summary>Registers one shared Redis connection, read from the "Redis" connection string.</summary>
+    /// <summary>
+    /// Registers one shared Redis connection, read from the "Redis" connection string, and the
+    /// Redis adapters that use it. Every host that needs them (the API, the worker) calls this once.
+    /// </summary>
     public static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Redis")
@@ -19,6 +23,7 @@ public static class RedisServiceCollectionExtensions
 
         // The factory runs on first use, so nothing connects until a request needs the lock.
         services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(options));
+        services.AddSingleton<ISeatLockStore, RedisSeatLockStore>();
 
         return services;
     }

@@ -1,4 +1,4 @@
-using Cinema.Api.Features.Seats.HoldSeat;
+using Cinema.Infrastructure.SeatLocks;
 
 namespace Cinema.IntegrationTests.SeatLock;
 

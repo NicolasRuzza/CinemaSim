@@ -1,5 +1,6 @@
 using Cinema.Api.Features.Seats.HoldSeat;
 using Cinema.BddTests.Support;
+using Cinema.Infrastructure.SeatLocks;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
