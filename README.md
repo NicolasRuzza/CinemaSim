@@ -43,7 +43,7 @@ dotnet test tests/Cinema.BddTests
 dotnet test tests/Cinema.IntegrationTests
 ```
 
-`Cinema.IntegrationTests` holds the seat lock contract tests: one suite of rules that every `ISeatLockStore` must honor. It runs against the in-memory fake and against a real Redis, so the fake used by the BDD scenarios cannot drift from the adapter. The Redis tests start a container through Testcontainers, so `dotnet test` must be able to reach Docker (for example, run it from WSL, where Docker lives). Skip them with `--filter "Requires!=Docker"`.
+`Cinema.IntegrationTests` holds the seat lock contract tests: one suite of rules that every `ISeatLockStore` must honor. It runs against the in-memory fake and against a real Redis, so the fake used by the BDD scenarios cannot drift from the adapter. The Redis tests start a container through Testcontainers, so `dotnet test` must be able to reach Docker (for example, run it from WSL, where Docker lives). Skip them with `--filter "Requires!=Docker"`. The project also holds the HTTP endpoint tests (the real API in memory, with the lock swapped for the fake) and smoke tests that run the whole stack against a real Redis. All Docker tests share one container and run one after another, because some of them depend on real time.
 
 Scenarios are in `tests/Cinema.BddTests/Features`. Reqnroll generates the `*.feature.cs` files on every build; they are git-ignored. A scenario without step definitions fails until its steps are implemented. The in-memory seat lock used by the scenarios is a test double: real atomicity and expiration are verified against Redis in the integration tests.
 
