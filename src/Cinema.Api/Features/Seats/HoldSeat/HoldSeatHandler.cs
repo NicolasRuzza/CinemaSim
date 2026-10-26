@@ -1,3 +1,4 @@
+using Cinema.Infrastructure.SeatLocks;
 using Mediator;
 using Microsoft.Extensions.Options;
 

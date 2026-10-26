@@ -1,4 +1,4 @@
-namespace Cinema.Api.Features.Seats.HoldSeat;
+namespace Cinema.Infrastructure.SeatLocks;
 
 /// <summary>Result of trying to take the lock of a seat.</summary>
 public enum SeatLockOutcome

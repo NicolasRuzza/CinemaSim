@@ -10,7 +10,6 @@ public static class HoldSeatServiceCollectionExtensions
             .Bind(configuration.GetSection("HoldSeat"))
             .Validate(options => options.HoldDuration > TimeSpan.Zero, "HoldSeat:HoldDuration must be greater than zero.")
             .ValidateOnStart();
-        services.AddSingleton<ISeatLockStore, RedisSeatLockStore>();
         services.AddSingleton<ISessionSchedule, MockSessionSchedule>();
 
         return services;

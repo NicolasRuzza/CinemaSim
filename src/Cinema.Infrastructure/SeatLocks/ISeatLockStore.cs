@@ -1,6 +1,6 @@
-namespace Cinema.Api.Features.Seats.HoldSeat;
+namespace Cinema.Infrastructure.SeatLocks;
 
-/// <summary>Port to the seat lock, owned by the hold seat use case.</summary>
+/// <summary>Port to the seat lock, shared by every host that works with seat holds.</summary>
 public interface ISeatLockStore
 {
     /// <summary>

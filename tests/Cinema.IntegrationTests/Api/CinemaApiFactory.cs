@@ -1,5 +1,5 @@
-using Cinema.Api.Features.Seats.HoldSeat;
 using Cinema.BddTests.Support;
+using Cinema.Infrastructure.SeatLocks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;

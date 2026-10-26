@@ -1,6 +1,6 @@
 using StackExchange.Redis;
 
-namespace Cinema.Api.Features.Seats.HoldSeat;
+namespace Cinema.Infrastructure.SeatLocks;
 
 /// <summary>
 /// Seat lock backed by Redis. Redis runs the script below as a single atomic step, so checking
