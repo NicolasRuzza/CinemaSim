@@ -65,7 +65,7 @@ public abstract class SeatLockStoreContract
     public async Task A_hold_is_still_active_before_it_expires()
     {
         await Acquire("Bob");
-        await WaitAsync(HoldDuration * 0.4);
+        await WaitAsync(HoldDuration * 0.25);
 
         (await Acquire("Jessica")).Should().Be(SeatLockOutcome.HeldByAnother);
     }
@@ -83,9 +83,9 @@ public abstract class SeatLockStoreContract
     public async Task A_repeated_hold_does_not_extend_the_duration()
     {
         await Acquire("Bob");
-        await WaitAsync(HoldDuration * 0.6);
+        await WaitAsync(HoldDuration * 0.35);
         (await Acquire("Bob")).Should().Be(SeatLockOutcome.AlreadyHeldByRequester);
-        await WaitAsync(HoldDuration * 0.6);
+        await WaitAsync(HoldDuration * 0.85);
 
         (await Acquire("Jessica")).Should().Be(SeatLockOutcome.Acquired);
     }

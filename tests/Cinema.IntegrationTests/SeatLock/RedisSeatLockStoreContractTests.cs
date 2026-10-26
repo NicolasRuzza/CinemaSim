@@ -4,8 +4,8 @@ namespace Cinema.IntegrationTests.SeatLock;
 
 /// <summary>Runs the seat lock contract against a real Redis. Needs Docker.</summary>
 [Trait("Requires", "Docker")]
-public sealed class RedisSeatLockStoreContractTests(RedisFixture redis)
-    : SeatLockStoreContract, IClassFixture<RedisFixture>
+[Collection("Redis")]
+public sealed class RedisSeatLockStoreContractTests(RedisFixture redis) : SeatLockStoreContract
 {
     protected override ISeatLockStore CreateStore() => new RedisSeatLockStore(redis.Connection);
 
