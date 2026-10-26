@@ -27,7 +27,7 @@ Service ports and the Loki readiness check are documented in [`infra/README.md`]
 
 ## Tooling
 
-- ASP.NET Core Web API with Vertical Slice Architecture: each use case lives in `src/Cinema.Api/Features/<Area>/<UseCase>/` with its command, handler, result and ports.
+- ASP.NET Core Web API with Vertical Slice Architecture: each use case lives in `src/Cinema.Api/Features/<Area>/<UseCase>/` with its command, handler, result and ports. A port that more than one host needs, such as the seat lock, lives in `src/Cinema.Infrastructure` with its adapter.
 - [Mediator](https://github.com/martinothamar/Mediator) (source generator, MIT) for commands and queries. The generator is installed only in the host project, `Cinema.Api`.
 - Reqnroll + xUnit for BDD scenarios, and AwesomeAssertions (Apache-2.0) for assertions.
 - [Moq](https://github.com/devlooped/moq) (BSD-3-Clause, 4.20.2 or newer) provides the test doubles in the unit tests.
