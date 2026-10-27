@@ -91,6 +91,58 @@ public abstract class SeatLockStoreContract
     }
 
     [Fact]
+    public async Task A_free_seat_is_acquired_with_a_reservation_id()
+    {
+        var result = await TryAcquire("Bob");
+
+        result.ReservationId.Should().HaveValue("a held seat comes with its reservation");
+        result.ReservationId.Should().NotBe(Guid.Empty);
+    }
+
+    [Fact]
+    public async Task The_same_customer_repeating_gets_the_same_reservation_id()
+    {
+        var first = ReservationIdOf(await TryAcquire("Bob"));
+
+        var second = ReservationIdOf(await TryAcquire("Bob"));
+
+        second.Should().Be(first);
+    }
+
+    [Fact]
+    public async Task A_new_hold_after_the_previous_one_expired_gets_a_different_reservation_id()
+    {
+        var first = ReservationIdOf(await TryAcquire("Bob"));
+        await WaitAsync(HoldDuration * 1.5);
+
+        var second = await TryAcquire("Bob");
+
+        second.Outcome.Should().Be(SeatLockOutcome.Acquired);
+        ReservationIdOf(second).Should().NotBe(first);
+    }
+
+    [Fact]
+    public async Task Each_held_seat_has_its_own_reservation_id()
+    {
+        var first = ReservationIdOf(await TryAcquire("Bob", seatId: "A1"));
+
+        var second = ReservationIdOf(await TryAcquire("Bob", seatId: "A2"));
+
+        second.Should().NotBe(first);
+    }
+
+    [Fact]
+    public async Task Another_customer_is_never_given_the_reservation_id_of_the_holder()
+    {
+        await Acquire("Bob");
+
+        var result = await TryAcquire("Jessica");
+
+        result.Outcome.Should().Be(SeatLockOutcome.HeldByAnother);
+        result.ReservationId.Should().BeNull("the reservation belongs to the holder alone");
+    }
+
+    [Fact]
     public async Task Only_one_of_many_simultaneous_acquisitions_wins()
     {
         const int customerCount = 20;
@@ -112,5 +164,15 @@ public abstract class SeatLockStoreContract
     }
 
     private async ValueTask<SeatLockOutcome> Acquire(string customerId, string seatId = "A1", string? sessionId = null) =>
-        (await Store.TryAcquireAsync(sessionId ?? SessionId, seatId, customerId, HoldDuration, CancellationToken.None)).Outcome;
+        (await TryAcquire(customerId, seatId, sessionId)).Outcome;
+
+    private ValueTask<SeatLockResult> TryAcquire(string customerId, string seatId = "A1", string? sessionId = null) =>
+        Store.TryAcquireAsync(sessionId ?? SessionId, seatId, customerId, HoldDuration, CancellationToken.None);
+
+    // Asserts the id exists before it is compared, so two missing ids can never look equal.
+    private static Guid ReservationIdOf(SeatLockResult result)
+    {
+        result.ReservationId.Should().HaveValue("a seat the customer holds comes with its reservation");
+        return result.ReservationId!.Value;
+    }
 }
