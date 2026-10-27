@@ -12,7 +12,7 @@ public interface ISeatLockStore
     /// customer while the lock is active returns <see cref="SeatLockOutcome.AlreadyHeldByRequester"/>
     /// and does not extend the expiration.
     /// </remarks>
-    ValueTask<SeatLockOutcome> TryAcquireAsync(
+    ValueTask<SeatLockResult> TryAcquireAsync(
         string sessionId,
         string seatId,
         string customerId,

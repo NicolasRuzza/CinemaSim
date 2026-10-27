@@ -23,7 +23,7 @@ public sealed class RedisSeatLockStore(IConnectionMultiplexer redis) : ISeatLock
         return 3
         """;
 
-    public async ValueTask<SeatLockOutcome> TryAcquireAsync(
+    public async ValueTask<SeatLockResult> TryAcquireAsync(
         string sessionId,
         string seatId,
         string customerId,
@@ -39,13 +39,15 @@ public sealed class RedisSeatLockStore(IConnectionMultiplexer redis) : ISeatLock
                 [customerId, (long)duration.TotalMilliseconds])
             .WaitAsync(cancellationToken);
 
-        return result switch
+        var outcome = result switch
         {
             1 => SeatLockOutcome.Acquired,
             2 => SeatLockOutcome.AlreadyHeldByRequester,
             3 => SeatLockOutcome.HeldByAnother,
             _ => throw new InvalidOperationException($"Unexpected result {result} from the seat lock script."),
         };
+
+        return new SeatLockResult(outcome, ReservationId: null);
     }
 
     private static RedisKey KeyFor(string sessionId, string seatId) => $"seat-hold:{sessionId}:{seatId}";

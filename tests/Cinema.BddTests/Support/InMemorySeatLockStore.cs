@@ -8,7 +8,7 @@ public sealed class InMemorySeatLockStore(TimeProvider clock) : ISeatLockStore
     private readonly Lock _gate = new();
     private readonly Dictionary<(string SessionId, string SeatId), (string CustomerId, DateTimeOffset ExpiresAt)> _holds = new();
 
-    public ValueTask<SeatLockOutcome> TryAcquireAsync(
+    public ValueTask<SeatLockResult> TryAcquireAsync(
         string sessionId,
         string seatId,
         string customerId,
@@ -23,13 +23,15 @@ public sealed class InMemorySeatLockStore(TimeProvider clock) : ISeatLockStore
             // A hold is active until the instant it expires; at that exact instant it is already gone.
             if (_holds.TryGetValue(key, out var hold) && hold.ExpiresAt > now)
             {
-                return ValueTask.FromResult(hold.CustomerId == customerId
+                var outcome = hold.CustomerId == customerId
                     ? SeatLockOutcome.AlreadyHeldByRequester
-                    : SeatLockOutcome.HeldByAnother);
+                    : SeatLockOutcome.HeldByAnother;
+
+                return ValueTask.FromResult(new SeatLockResult(outcome, ReservationId: null));
             }
 
             _holds[key] = (customerId, now + duration);
-            return ValueTask.FromResult(SeatLockOutcome.Acquired);
+            return ValueTask.FromResult(new SeatLockResult(SeatLockOutcome.Acquired, ReservationId: null));
         }
     }
 }

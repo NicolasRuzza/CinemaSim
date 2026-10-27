@@ -99,7 +99,7 @@ public sealed class HoldSeatHandlerTests
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(outcome);
+            .ReturnsAsync(new SeatLockResult(outcome, ReservationId: null));
 
     private void VerifyNoLockWasTaken() =>
         _seatLocks.Verify(

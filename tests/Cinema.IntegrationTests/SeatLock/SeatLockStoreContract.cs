@@ -111,6 +111,6 @@ public abstract class SeatLockStoreContract
         outcomes.Count(outcome => outcome == SeatLockOutcome.HeldByAnother).Should().Be(customerCount - 1);
     }
 
-    private ValueTask<SeatLockOutcome> Acquire(string customerId, string seatId = "A1", string? sessionId = null) =>
-        Store.TryAcquireAsync(sessionId ?? SessionId, seatId, customerId, HoldDuration, CancellationToken.None);
+    private async ValueTask<SeatLockOutcome> Acquire(string customerId, string seatId = "A1", string? sessionId = null) =>
+        (await Store.TryAcquireAsync(sessionId ?? SessionId, seatId, customerId, HoldDuration, CancellationToken.None)).Outcome;
 }

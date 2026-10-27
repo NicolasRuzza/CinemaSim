@@ -22,14 +22,14 @@ public sealed class HoldSeatHandler(
             return HoldSeatResult.Rejected(HoldRejectionReason.SeatNotFound);
         }
 
-        var outcome = await seatLocks.TryAcquireAsync(
+        var lockResult = await seatLocks.TryAcquireAsync(
             command.SessionId,
             command.SeatId,
             command.CustomerId,
             options.Value.HoldDuration,
             cancellationToken);
 
-        return outcome == SeatLockOutcome.HeldByAnother
+        return lockResult.Outcome == SeatLockOutcome.HeldByAnother
             ? HoldSeatResult.Rejected(HoldRejectionReason.SeatAlreadyHeld)
             : HoldSeatResult.Accepted();
     }
