@@ -1,6 +1,6 @@
 @Cinema.Api_HostAddress = http://localhost:5169
 
-### Hold a seat: 200 when accepted (also when the same customer repeats it)
+### Hold a seat: 200 with a reservationId (the same customer repeating it gets the same one)
 POST {{Cinema.Api_HostAddress}}/api/v1/sessions/S1/seats/hold
 Content-Type: application/json
 

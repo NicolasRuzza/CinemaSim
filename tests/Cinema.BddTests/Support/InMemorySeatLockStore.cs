@@ -6,9 +6,9 @@ namespace Cinema.BddTests.Support;
 public sealed class InMemorySeatLockStore(TimeProvider clock) : ISeatLockStore
 {
     private readonly Lock _gate = new();
-    private readonly Dictionary<(string SessionId, string SeatId), (string CustomerId, DateTimeOffset ExpiresAt)> _holds = new();
+    private readonly Dictionary<(string SessionId, string SeatId), (string CustomerId, Guid ReservationId, DateTimeOffset ExpiresAt)> _holds = new();
 
-    public ValueTask<SeatLockOutcome> TryAcquireAsync(
+    public ValueTask<SeatLockResult> TryAcquireAsync(
         string sessionId,
         string seatId,
         string customerId,
@@ -24,12 +24,13 @@ public sealed class InMemorySeatLockStore(TimeProvider clock) : ISeatLockStore
             if (_holds.TryGetValue(key, out var hold) && hold.ExpiresAt > now)
             {
                 return ValueTask.FromResult(hold.CustomerId == customerId
-                    ? SeatLockOutcome.AlreadyHeldByRequester
-                    : SeatLockOutcome.HeldByAnother);
+                    ? new SeatLockResult(SeatLockOutcome.AlreadyHeldByRequester, hold.ReservationId)
+                    : new SeatLockResult(SeatLockOutcome.HeldByAnother, ReservationId: null));
             }
 
-            _holds[key] = (customerId, now + duration);
-            return ValueTask.FromResult(SeatLockOutcome.Acquired);
+            var reservationId = Guid.NewGuid();
+            _holds[key] = (customerId, reservationId, now + duration);
+            return ValueTask.FromResult(new SeatLockResult(SeatLockOutcome.Acquired, reservationId));
         }
     }
 }

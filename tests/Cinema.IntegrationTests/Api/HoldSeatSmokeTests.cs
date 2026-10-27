@@ -35,6 +35,18 @@ public sealed class HoldSeatSmokeTests(RedisFixture redis) : IDisposable
     }
 
     [Fact]
+    public async Task The_reservation_id_in_the_response_is_the_one_stored_in_redis()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await Hold(client, "S4", "E5", "Bob");
+
+        var reservationId = await HoldResponseBody.ReadReservationIdAsync(response);
+        var stored = await redis.Connection.GetDatabase().HashGetAsync("seat-hold:S4:E5", "reservation");
+        stored.ToString().Should().Be(reservationId.ToString());
+    }
+
+    [Fact]
     public async Task Twenty_simultaneous_requests_for_one_seat_yield_exactly_one_200()
     {
         var client = _factory.CreateClient();

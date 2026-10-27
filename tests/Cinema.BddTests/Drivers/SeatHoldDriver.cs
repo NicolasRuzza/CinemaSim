@@ -38,6 +38,12 @@ public sealed class SeatHoldDriver
     /// <summary>The results of the last operation: one for a single hold, many for a simultaneous batch.</summary>
     public IReadOnlyList<HoldSeatResult> LastResults => _lastResults;
 
+    /// <summary>A reservation id set aside by the scenario, to compare with the one a later hold returns.</summary>
+    public Guid RememberedReservationId { get; private set; }
+
+    public void RememberReservationId(Guid reservationId) =>
+        RememberedReservationId = reservationId;
+
     public void AddSession(string sessionId, params string[] seatIds) =>
         _schedule.Add(sessionId, seatIds);
 

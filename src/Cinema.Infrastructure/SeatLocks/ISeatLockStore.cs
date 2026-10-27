@@ -10,9 +10,10 @@ public interface ISeatLockStore
     /// <remarks>
     /// The lock expires exactly after <paramref name="duration"/>. Repeating the call for the same
     /// customer while the lock is active returns <see cref="SeatLockOutcome.AlreadyHeldByRequester"/>
-    /// and does not extend the expiration.
+    /// with the same reservation id and does not extend the expiration. A hold made after the lock
+    /// expired is a new reservation with a new id.
     /// </remarks>
-    ValueTask<SeatLockOutcome> TryAcquireAsync(
+    ValueTask<SeatLockResult> TryAcquireAsync(
         string sessionId,
         string seatId,
         string customerId,

@@ -20,7 +20,7 @@ public sealed class HoldSeatController(ISender sender) : ControllerBase
 
         if (result.IsAccepted)
         {
-            return Ok(new HoldSeatResponse(sessionId, request.SeatId, request.CustomerId));
+            return Ok(new HoldSeatResponse(sessionId, request.SeatId, request.CustomerId, result.ReservationId!.Value));
         }
 
         return result.RejectionReason switch

@@ -22,15 +22,16 @@ public sealed class HoldSeatHandler(
             return HoldSeatResult.Rejected(HoldRejectionReason.SeatNotFound);
         }
 
-        var outcome = await seatLocks.TryAcquireAsync(
+        var lockResult = await seatLocks.TryAcquireAsync(
             command.SessionId,
             command.SeatId,
             command.CustomerId,
             options.Value.HoldDuration,
             cancellationToken);
 
-        return outcome == SeatLockOutcome.HeldByAnother
+        // The seat lock contract guarantees a reservation id whenever the requester holds the seat.
+        return lockResult.Outcome == SeatLockOutcome.HeldByAnother
             ? HoldSeatResult.Rejected(HoldRejectionReason.SeatAlreadyHeld)
-            : HoldSeatResult.Accepted();
+            : HoldSeatResult.Accepted(lockResult.ReservationId!.Value);
     }
 }
