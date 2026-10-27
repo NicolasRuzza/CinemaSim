@@ -11,12 +11,15 @@ public abstract class SeatLockStoreContract
 {
     private static readonly TimeSpan HoldDuration = TimeSpan.FromSeconds(1);
 
-    private ISeatLockStore? _store;
+    private readonly Lazy<ISeatLockStore> _store;
+
+    protected SeatLockStoreContract() => _store = new Lazy<ISeatLockStore>(CreateStore);
 
     // A unique session per test keeps tests independent when they share one Redis.
     private string SessionId { get; } = Guid.NewGuid().ToString("N");
 
-    private ISeatLockStore Store => _store ??= CreateStore();
+    // Lazy is thread safe: simultaneous first calls must share one store, not each build their own.
+    private ISeatLockStore Store => _store.Value;
 
     protected abstract ISeatLockStore CreateStore();
 
