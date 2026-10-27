@@ -6,7 +6,7 @@ namespace Cinema.BddTests.Support;
 public sealed class InMemorySeatLockStore(TimeProvider clock) : ISeatLockStore
 {
     private readonly Lock _gate = new();
-    private readonly Dictionary<(string SessionId, string SeatId), (string CustomerId, DateTimeOffset ExpiresAt)> _holds = new();
+    private readonly Dictionary<(string SessionId, string SeatId), (string CustomerId, Guid ReservationId, DateTimeOffset ExpiresAt)> _holds = new();
 
     public ValueTask<SeatLockResult> TryAcquireAsync(
         string sessionId,
@@ -23,15 +23,14 @@ public sealed class InMemorySeatLockStore(TimeProvider clock) : ISeatLockStore
             // A hold is active until the instant it expires; at that exact instant it is already gone.
             if (_holds.TryGetValue(key, out var hold) && hold.ExpiresAt > now)
             {
-                var outcome = hold.CustomerId == customerId
-                    ? SeatLockOutcome.AlreadyHeldByRequester
-                    : SeatLockOutcome.HeldByAnother;
-
-                return ValueTask.FromResult(new SeatLockResult(outcome, ReservationId: null));
+                return ValueTask.FromResult(hold.CustomerId == customerId
+                    ? new SeatLockResult(SeatLockOutcome.AlreadyHeldByRequester, hold.ReservationId)
+                    : new SeatLockResult(SeatLockOutcome.HeldByAnother, ReservationId: null));
             }
 
-            _holds[key] = (customerId, now + duration);
-            return ValueTask.FromResult(new SeatLockResult(SeatLockOutcome.Acquired, ReservationId: null));
+            var reservationId = Guid.NewGuid();
+            _holds[key] = (customerId, reservationId, now + duration);
+            return ValueTask.FromResult(new SeatLockResult(SeatLockOutcome.Acquired, reservationId));
         }
     }
 }
