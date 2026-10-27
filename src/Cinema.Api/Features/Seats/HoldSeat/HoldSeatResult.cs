@@ -18,7 +18,7 @@ public sealed record HoldSeatResult
     /// <summary>The reservation that holds the seat. Null when the hold was rejected.</summary>
     public Guid? ReservationId { get; }
 
-    public static HoldSeatResult Accepted() => new(true, null, null);
+    public static HoldSeatResult Accepted(Guid reservationId) => new(true, null, reservationId);
 
     public static HoldSeatResult Rejected(HoldRejectionReason reason) => new(false, reason, null);
 }

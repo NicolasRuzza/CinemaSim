@@ -29,8 +29,9 @@ public sealed class HoldSeatHandler(
             options.Value.HoldDuration,
             cancellationToken);
 
+        // The seat lock contract guarantees a reservation id whenever the requester holds the seat.
         return lockResult.Outcome == SeatLockOutcome.HeldByAnother
             ? HoldSeatResult.Rejected(HoldRejectionReason.SeatAlreadyHeld)
-            : HoldSeatResult.Accepted();
+            : HoldSeatResult.Accepted(lockResult.ReservationId!.Value);
     }
 }
