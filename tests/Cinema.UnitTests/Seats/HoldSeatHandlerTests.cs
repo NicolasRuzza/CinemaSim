@@ -64,14 +64,16 @@ public sealed class HoldSeatHandlerTests
     [Theory]
     [InlineData(SeatLockOutcome.Acquired)]
     [InlineData(SeatLockOutcome.AlreadyHeldByRequester)]
-    public async Task A_lock_the_customer_holds_is_accepted(SeatLockOutcome outcome)
+    public async Task A_lock_the_customer_holds_is_accepted_with_its_reservation_id(SeatLockOutcome outcome)
     {
+        var reservationId = Guid.NewGuid();
         ExistingSeat("S1", "A1");
-        LockOutcomeIs(outcome);
+        LockResultIs(new SeatLockResult(outcome, reservationId));
 
         var result = await Handle("S1", "A1", "Bob");
 
-        result.Should().Be(HoldSeatResult.Accepted());
+        result.IsAccepted.Should().BeTrue();
+        result.ReservationId.Should().Be(reservationId);
     }
 
     [Fact]
@@ -91,7 +93,11 @@ public sealed class HoldSeatHandlerTests
         _schedule.Setup(schedule => schedule.SeatExists(sessionId, seatId)).Returns(true);
     }
 
+    // A lock the customer holds always comes with its reservation; one held by another never does.
     private void LockOutcomeIs(SeatLockOutcome outcome) =>
+        LockResultIs(new SeatLockResult(outcome, outcome == SeatLockOutcome.HeldByAnother ? null : Guid.NewGuid()));
+
+    private void LockResultIs(SeatLockResult result) =>
         _seatLocks
             .Setup(seatLocks => seatLocks.TryAcquireAsync(
                 It.IsAny<string>(),
@@ -99,7 +105,7 @@ public sealed class HoldSeatHandlerTests
                 It.IsAny<string>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new SeatLockResult(outcome, ReservationId: null));
+            .ReturnsAsync(result);
 
     private void VerifyNoLockWasTaken() =>
         _seatLocks.Verify(

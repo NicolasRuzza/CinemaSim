@@ -23,6 +23,31 @@ public sealed class HoldSeatStepDefinitions(SeatHoldDriver driver)
     public void ThenTheHoldIsAccepted() =>
         driver.LastResult.IsAccepted.Should().BeTrue("an available seat can be held");
 
+    [Given("the hold returned a reservation ID")]
+    public void GivenTheHoldReturnedAReservationId() =>
+        driver.RememberReservationId(LastReservationId());
+
+    [Then("the hold returns a reservation ID")]
+    public void ThenTheHoldReturnsAReservationId() =>
+        LastReservationId().Should().NotBe(Guid.Empty);
+
+    [Then("the hold returns the same reservation ID")]
+    public void ThenTheHoldReturnsTheSameReservationId() =>
+        LastReservationId().Should().Be(driver.RememberedReservationId);
+
+    [Then("the hold returns a different reservation ID")]
+    public void ThenTheHoldReturnsADifferentReservationId() =>
+        LastReservationId().Should().NotBe(driver.RememberedReservationId);
+
+    // Asserts the id exists before it is compared, so two missing ids can never look equal.
+    private Guid LastReservationId()
+    {
+        var reservationId = driver.LastResult.ReservationId;
+
+        reservationId.Should().HaveValue("an accepted hold returns its reservation");
+        return reservationId!.Value;
+    }
+
     private static readonly Dictionary<string, HoldRejectionReason> RejectionReasons = new()
     {
         ["the seat is already held"] = HoldRejectionReason.SeatAlreadyHeld,

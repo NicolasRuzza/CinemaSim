@@ -73,6 +73,24 @@ public sealed class HoldSeatEndpointTests : IDisposable
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task Holding_an_available_seat_returns_its_reservation_id()
+    {
+        var response = await Hold("S1", "A1", "Bob");
+
+        (await HoldResponseBody.ReadReservationIdAsync(response)).Should().NotBe(Guid.Empty);
+    }
+
+    [Fact]
+    public async Task Repeating_a_hold_by_the_same_customer_returns_the_same_reservation_id()
+    {
+        var first = await HoldResponseBody.ReadReservationIdAsync(await Hold("S1", "A1", "Bob"));
+
+        var second = await HoldResponseBody.ReadReservationIdAsync(await Hold("S1", "A1", "Bob"));
+
+        second.Should().Be(first);
+    }
+
     private Task<HttpResponseMessage> PostJson(string sessionId, string json) =>
         _factory.CreateClient().PostAsync(
             $"/api/v1/sessions/{sessionId}/seats/hold",

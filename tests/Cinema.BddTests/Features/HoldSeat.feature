@@ -10,11 +10,14 @@ Feature: Hold a seat
   Scenario: Hold an available seat
     When customer "Bob" holds seat "A1" of session "S1"
     Then the hold is accepted
+    And the hold returns a reservation ID
 
   Scenario: Accept a repeated hold by the same customer
     Given customer "Bob" holds seat "A1" of session "S1"
+    And the hold returned a reservation ID
     When customer "Bob" holds seat "A1" of session "S1"
     Then the hold is accepted
+    And the hold returns the same reservation ID
 
   Scenario: Reject a hold on a seat already held by another customer
     Given customer "Bob" holds seat "A1" of session "S1"
@@ -48,6 +51,14 @@ Feature: Hold a seat
     And 5 minutes have passed
     When customer "Jessica" holds seat "A1" of session "S1"
     Then the hold is accepted
+
+  Scenario: A hold made after the previous one expired gets a new reservation ID
+    Given customer "Bob" holds seat "A1" of session "S1"
+    And the hold returned a reservation ID
+    And 5 minutes have passed
+    When customer "Bob" holds seat "A1" of session "S1"
+    Then the hold is accepted
+    And the hold returns a different reservation ID
 
   Scenario: A repeated hold does not extend the 5-minute duration
     Given customer "Bob" holds seat "A1" of session "S1"
