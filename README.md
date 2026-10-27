@@ -32,7 +32,7 @@ Service ports and the Loki readiness check are documented in [`infra/README.md`]
 - Reqnroll + xUnit for BDD scenarios, and AwesomeAssertions (Apache-2.0) for assertions.
 - [Moq](https://github.com/devlooped/moq) (BSD-3-Clause, 4.20.2 or newer) provides the test doubles in the unit tests.
 - `FakeTimeProvider` (Microsoft.Extensions.TimeProvider.Testing, MIT) moves time forward instantly in scenarios, so a 5-minute hold expires without waiting.
-- [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) (MIT) backs the seat lock. `RedisSeatLockStore` runs a Lua script so checking and taking a seat is one atomic step.
+- [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) (MIT) backs the seat lock. `RedisSeatLockStore` runs a Lua script so checking and taking a seat is one atomic step. The lock is a Redis hash holding the customer and the reservation id.
 - [Testcontainers](https://dotnet.testcontainers.org/) (MIT) starts a throwaway Redis for the contract tests.
 - Use-case settings follow the .NET Options pattern, for example `HoldSeatOptions.HoldDuration` (5 minutes by default).
 
@@ -55,10 +55,21 @@ curl -i -X POST http://localhost:5169/api/v1/sessions/S1/seats/hold \
 
 | Status | When |
 |---|---|
-| `200` | The seat is held for the customer. The same customer repeating the request also gets `200`, and the five minutes are not extended. |
+| `200` | The seat is held for the customer, and the body carries the `reservationId`. The same customer repeating the request also gets `200` and the same `reservationId`, and the five minutes are not extended. |
 | `409` | Another customer holds the seat. |
 | `404` | The session or the seat does not exist. |
 | `400` | `seatId` or `customerId` is missing or blank. |
+
+A `200` echoes the hold and names its reservation. A hold made after the previous one expired is a new reservation with a new id:
+
+```json
+{
+  "sessionId": "S1",
+  "seatId": "A1",
+  "customerId": "Bob",
+  "reservationId": "0b6c1f0e-5d2e-4c7e-9a41-6f1d3a8e2b57"
+}
+```
 
 Errors are returned as `application/problem+json`. The Phase 1 schedule is mocked: sessions `S1` to `S5`, seats `A1` to `E8`. In Development, the OpenAPI document is at `/openapi/v1.json`.
 
